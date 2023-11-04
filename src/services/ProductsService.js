@@ -3,23 +3,23 @@ export default class ProductsService {
     this.manager = manager;
   }
   getProducts = () => {
-    return this.manager.getProducts(params);
+    return this.manager.getProducts(products);
   };
 
   paginateProducts = () => {
-    return this.manager.paginateProducts(params, paginateOptions);
+    return this.manager.paginateProducts(products, paginateOptions);
   };
 
   getProductBy = () => {
-    return this.manager.getProductBy(params);
+    return this.manager.getProductBy(products);
   };
 
   createProduct = () => {
-    return this.manager.createProduct(product);
+    return this.manager.createProduct(products);
   };
 
   updateProduct = () => {
-    return this.manager.updateProduct(id, product);
+    return this.manager.updateProduct(id, products);
   };
 
   deleteProduct = () => {
