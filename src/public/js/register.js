@@ -14,8 +14,7 @@ form.addEventListener("submit", async (event) => {
   });
 
   const result = await response.json();
-  console.log(result);
   if (response.status === 200) {
-    window.location = "/profile";
+    return window.location.replace("/login");
   }
 });

@@ -31,8 +31,8 @@ const schema = new mongoose.Schema(
       required: true,
     },
     thumbnail: {
-      type: Array,
-      default: []
+      type: String,
+      required: false,
     },
     status: {
       type: Boolean,

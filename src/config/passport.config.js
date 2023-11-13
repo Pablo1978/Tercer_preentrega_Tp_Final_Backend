@@ -2,13 +2,9 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as JWTStrategy, ExtractJwt } from "passport-jwt";
 
-import UsersManager from "../dao/mongo/managers/userManager.js";
-import CartManager from "../dao/mongo/managers/cartManager.js";
+import { usersService, cartsService } from "../services/index.js";
 import authService from "../services/authService.js";
 import config from "./config.js";
-
-const usersService = new UsersManager();
-const cartSevice = new CartManager();
 
 const initializePassportStrategies = () => {
   passport.use(
