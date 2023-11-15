@@ -11,11 +11,9 @@ class SessionsRouter extends BaseRouter {
       passportCall("register", { strategyType: "LOCALS" }),
       async (req, res) => {
         res.clearCookie("cart");
-        res.sendSuccess("Registered");
-        res.redirect("/profile");
+        return res.sendSuccess("Registered");
       }
     );
-
     this.post(
       "/login",
       ["NO_AUTH"],
@@ -33,18 +31,16 @@ class SessionsRouter extends BaseRouter {
         });
         res.cookie(config.jwt.COOKIE, token);
         res.clearCookie("cart");
-        res.sendSuccess("Logged In");
+        return res.sendSuccess("Logged In");
       }
     );
-
     this.get("/logout", ["AUTH"], async (req, res) => {
       res.clearCookie(config.jwt.COOKIE);
-      res.sendSuccess("Logged Out");
+      return res.sendSuccess("Logged Out");
     });
 
     this.get("/current", ["AUTH"], async (req, res) => {
-      console.log(req.user);
-      res.sendSuccessWithPayload(req.user);
+      return res.sendSuccessWithPayload(req.user);
     });
   }
 }
@@ -52,4 +48,3 @@ class SessionsRouter extends BaseRouter {
 const sessionsRouter = new SessionsRouter();
 
 export default sessionsRouter.getRouter();
-
