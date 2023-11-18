@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as JWTStrategy, ExtractJwt } from "passport-jwt";
-
+import GitHubStrategy from "passport-github2";
 import { usersService, cartsService } from "../services/index.js";
 import authService from "../services/authService.js";
 import config from "./config.js";
@@ -110,6 +110,41 @@ const initializePassportStrategies = () => {
       },
       async (payload, done) => {
         return done(null, payload);
+      }
+    )
+  );
+
+  passport.use(
+    "github",
+    new GitHubStrategy(
+      {
+        clientID: "",
+        clientSecret: "",
+        callbackURL: "",
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          console.log(profile);
+          let user = await usersService.getUserBy({
+            email: profile._json.email,
+          });
+          if (!user) {
+            let newUser = {
+              first_name: profile._json.name,
+              last_name: "",
+              age: "",
+              email: profile._json.email,
+              password: "",
+              admin: false,
+            };
+            let result = await usersService.createUser(newUser);
+            return done(null, result);
+          } else {
+            return done(null, user);
+          }
+        } catch (err) {
+          return done(err);
+        }
       }
     )
   );

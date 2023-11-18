@@ -38,6 +38,7 @@ const createProduct = async (req, res) => {
     throw new error("Error al crear el producto", error);
   }
 };
+
 const updateProduct = async (req, res) => {
   const id = parseInt(req.params.pid);
   const product = await productsService.updateProduct(id, req.body);

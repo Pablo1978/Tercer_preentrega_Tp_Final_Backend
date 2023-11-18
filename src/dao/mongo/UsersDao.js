@@ -18,6 +18,6 @@ export default class UsersDao {
   };
 
   deleteUser = (id) => {
-    return userModel.deleteOne({ _id: id });
+    return userModel.updateOne({ _id: id }, { $set: { activate: false}});
   };
 }

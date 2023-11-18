@@ -14,6 +14,7 @@ class SessionsRouter extends BaseRouter {
         return res.sendSuccess("Registered");
       }
     );
+    
     this.post(
       "/login",
       ["NO_AUTH"],
@@ -26,6 +27,7 @@ class SessionsRouter extends BaseRouter {
           cart: req.user.cart,
           email: req.user.email,
         };
+
         const token = jwt.sign(tokenizedUser, config.jwt.SECRET, {
           expiresIn: "1d",
         });
@@ -34,6 +36,7 @@ class SessionsRouter extends BaseRouter {
         return res.sendSuccess("Logged In");
       }
     );
+
     this.get("/logout", ["AUTH"], async (req, res) => {
       res.clearCookie(config.jwt.COOKIE);
       return res.sendSuccess("Logged Out");
@@ -42,9 +45,54 @@ class SessionsRouter extends BaseRouter {
     this.get("/current", ["AUTH"], async (req, res) => {
       return res.sendSuccessWithPayload(req.user);
     });
+
+    this.get(
+      "/github",
+      ["NO_AUTH"],
+      passportCall("github", { strategyType: "GITHUB" }),
+      async (req, res) => {}
+    );
+
+    this.get(
+      "/githubcallback",
+      ["NO_AUTH"],
+      passportCall("github", { strategyType: "GITHUB" }),
+      async (req, res) => {
+        try {
+          const { firstName, lastName, _id, role, cart, email } = req.user;
+
+          const tokenizedUser = {
+            name: `${firstName} ${lastName}`,
+            id: _id,
+            role: role,
+            cart: cart,
+            email: email,
+          };
+
+          const token = jwt.sign(tokenizedUser, config.jwt.SECRET, {
+            expiresIn: "1d",
+          });
+
+          res.cookie(config.jwt.COOKIE, token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "strict",
+            maxAge: 86400000,
+          });
+
+          res.clearCookie("cart");
+
+          return res.redirect("/profile");
+        } catch (error) {
+          console.error("Error in GitHub callback:", error);
+          return res.sendError("An error occurred during login");
+        }
+      }
+    );
   }
 }
 
 const sessionsRouter = new SessionsRouter();
 
 export default sessionsRouter.getRouter();
+
