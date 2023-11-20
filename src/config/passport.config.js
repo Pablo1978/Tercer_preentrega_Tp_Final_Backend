@@ -2,6 +2,8 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as JWTStrategy, ExtractJwt } from "passport-jwt";
 import GitHubStrategy from "passport-github2";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+
 import { usersService, cartsService } from "../services/index.js";
 import authService from "../services/authService.js";
 import config from "./config.js";
@@ -17,17 +19,11 @@ const initializePassportStrategies = () => {
           if (!firstName || !lastName)
             return done(null, false, { message: "Incomplete values" });
 
-          //Corroborar que el usuario no exista.
-
           const exists = await usersService.getUserBy({ email });
           if (exists)
             return done(null, false, { message: "User already exists" });
 
-          //Antes de crear al usuario, necesito aplicar un hash a su contraseña
-
           const hashedPassword = await authService.createHash(password);
-
-          //Ahora sí creo al usuario
 
           const newUser = {
             firstName,
@@ -36,15 +32,11 @@ const initializePassportStrategies = () => {
             password: hashedPassword,
           };
 
-          //Revisar el carrito temporal
-
           let cart;
           if (req.cookies["cart"]) {
-
-            //Obtener el que ya esta en la cookie
             cart = req.cookies["cart"];
           } else {
-            cartResult = await cartSevice.createCart();
+            const cartResult = await cartsService.createCart();
             cart = cartResult.id;
           }
           newUser.cart = cart;
@@ -76,13 +68,10 @@ const initializePassportStrategies = () => {
             };
             return done(null, adminUser);
           }
-          //Aquí el usuario sí debería existir, corroborar primero.
 
           const user = await usersService.getUserBy({ email });
           if (!user)
             return done(null, false, { message: "Invalid Credentials" });
-
-          //Ahora toca validar su contraseña, ¿es equivalente?
 
           const isValidPassword = await authService.validatePassword(
             password,
@@ -118,32 +107,68 @@ const initializePassportStrategies = () => {
     "github",
     new GitHubStrategy(
       {
-        clientID: "",
-        clientSecret: "",
-        callbackURL: "",
+        clientID: config.github.CLIENT_ID || "Iv1.ecdb7f8e547fc390",
+        clientSecret: config.github.CLIENT_SECRET || "282f1933dce49e538e6117b53b6aed49424665d5",
+        callbackURL: "http://localhost:8080/api/sessions/githubcallback",
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          console.log(profile);
-          let user = await usersService.getUserBy({
-            email: profile._json.email,
-          });
+          const email = profile._json.email;
+
+          let user = await usersService.getUserBy({ email });
+
           if (!user) {
-            let newUser = {
+            const newUser = {
               first_name: profile._json.name,
               last_name: "",
               age: "",
-              email: profile._json.email,
+              email,
               password: "",
               admin: false,
             };
-            let result = await usersService.createUser(newUser);
-            return done(null, result);
+            const createdUser = await usersService.createUser(newUser);
+            return done(null, createdUser);
           } else {
             return done(null, user);
           }
         } catch (err) {
           return done(err);
+        }
+      }
+    )
+  );
+  passport.use(
+    "google",
+    new GoogleStrategy(
+      {
+        clientID: config.google.CLIENT_ID || "876750335845-m9tb1o5eiqs84r4cob9ddcj0ven7t86c.apps.googleusercontent.com",
+        clientSecret: config.google.CLIENT_SECRET || "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",
+        callbackURL: "http://localhost:8080/api/sessions/googlecallback",
+        passReqToCallback: true,
+      },
+      async (req, accessToken, refreshToken, profile, done) => {
+        const { _json } = profile;
+        const user = await usersService.getUserBy({ email: _json.email });
+        if (user) {
+          return done(null, user);
+        } else {
+          const newUser = {
+            firstName: _json.given_name,
+            lastName: _json.family_name,
+            email: _json.email,
+          };
+          let cart;
+
+          if (req.cookies["cart"]) {
+            cart = req.cookies["cart"];
+          } else {
+            const cartResult = await cartsService.createCart();
+            cart = cartResult.id;
+          }
+
+          newUser.cart = cart;
+          const result = await usersService.createUser(newUser);
+          return done(null, result);
         }
       }
     )

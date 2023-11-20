@@ -1,9 +1,5 @@
 import BaseRouter from "./BaseRouter.js";
-import {
-  productsService,
-  cartsService,
-  ticketsService,
-} from "../services/index.js";
+import { productsService, cartsService, ticketsService, } from "../services/index.js";
 
 import { getValidFilters } from "../utils.js";
 
@@ -20,6 +16,7 @@ class ViewsRouter extends BaseRouter {
     this.get("/profile", ["AUTH"], async (req, res) => {
       return res.render("profile");
     });
+
     this.get("/", ["PUBLIC"], async (req, res) => {
       return res.render("home");
     });
@@ -32,6 +29,7 @@ class ViewsRouter extends BaseRouter {
       if (sort) {
         sortResult[sort] = order;
       }
+
       const pagination = await productsService.paginateProducts(cleanFilters, {
         page,
         lean: true,
@@ -49,19 +47,18 @@ class ViewsRouter extends BaseRouter {
       });
     });
 
-    this.get("/chat", ["PUBLIC"], (req, res) => {
+    this.get("/chat", ["PUBLIC"], async (req, res) => {
       return res.render("chat");
     });
 
     this.get("/cart", ["AUTH"], async (req, res) => {
       const cart = await cartsService.getCartById(req.user._id);
-      console.log(cart);
-      return res.render("cart");
+      return res.render("cart", { cart });
     });
-
+    
     this.get("/purchase", ["AUTH"], async (req, res) => {
-      const ticket = await ticketsService.getTicketsByCart(req.user.cart._id);
-      return res.render("purchase");
+      const ticket = await ticketsService.getTicketsBy(req.user.cart._id);
+      return res.render("purchase", { ticket });
     });
   }
 }
@@ -69,3 +66,4 @@ class ViewsRouter extends BaseRouter {
 const viewsRouter = new ViewsRouter();
 
 export default viewsRouter.getRouter();
+

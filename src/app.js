@@ -4,20 +4,19 @@ import mongoose from "mongoose";
 import handlebars from "express-handlebars";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import compression from "express-compression";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerUIExpress from "swagger-ui-express";
 
 import productsRouter from "./routes/ProductsRouter.js";
 import cartsRouter from "./routes/CartRouter.js";
 import viewsRouter from "./routes/ViewsRouter.js";
 import SessionsRouter from "./routes/SessionsRouter.js";
+import dictionaryRouter from "./routes/dictionary.router.js";
 
 import __dirname from "./utils.js";
 import config from "./config/config.js";
 import initializePassportStrategies from "./config/passport.config.js";
-
-//import ProductManager from "./dao/mongo/managers/productManager.js";
-//import ChatManager from "./dao/mongo/managers/chatManager.js";
-
-import { cartsService, productsService } from "./services/index.js";
 
 const app = express();
 
@@ -42,6 +41,38 @@ app.use("/", viewsRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 app.use("/api/sessions", SessionsRouter);
+app.use("/api/dictionary", dictionaryRouter);
+
+app.use(compression({
+  brotli: {
+    enabled: true,
+    zlib: {},
+  },
+})
+);
+
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.1",
+    info: {
+      title: "Acuario Pablo´s docs",
+      description: "Aplicación para E-commerce",
+    },
+  },
+  apis: [`${__dirname}/docs/**/*.yml`],
+};
+
+const swaggerSpec = swaggerJSDoc(swaggerOptions);
+app.use(
+  "/apidocs",
+  swaggerUIExpress.serve,
+  swaggerUIExpress.setup(swaggerSpec)
+);
+
+app.use((error, req, res, next) => {
+  console.log(error);
+  res.status(500).send("Error en el servidor");
+});
 
 const httpServer = app.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);

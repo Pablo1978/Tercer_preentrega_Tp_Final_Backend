@@ -52,6 +52,7 @@ export default class ProductsDao {
       console.log(error);
     }
   };
+  
   getProducts = async () => {
     try {
       if (fs.existsSync(this.path)) {

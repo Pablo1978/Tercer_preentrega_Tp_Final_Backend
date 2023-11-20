@@ -19,6 +19,7 @@ export default class CartsDao {
       console.error(error);
     }
   };
+  
   createCart = async () => {
     try {
       const carts = await this.getCarts();
@@ -39,6 +40,7 @@ export default class CartsDao {
       console.error(error);
     }
   };
+
   addProductToCart = async (cid, pid) => {
     try {
       const carts = await this.getCarts();
@@ -64,6 +66,7 @@ export default class CartsDao {
       console.log(error);
     }
   };
+
   getCartById = async (id) => {
     try {
       const carts = await this.getCarts();
@@ -78,6 +81,7 @@ export default class CartsDao {
       console.error(error);
     }
   };
+
   updateCart = async (cid, updatedCart) => {
     try {
       const carts = await this.getCarts();

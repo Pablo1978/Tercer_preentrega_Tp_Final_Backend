@@ -2,7 +2,7 @@ import passport from "passport";
 
 const passportCall = (strategy, options = {}) => {
   return (req, res, next) => {
-    passport.authenticate(strategy, async (error, user, info) => {
+    passport.authenticate(strategy, options, async (error, user, info) => {
       if (error) {
         return next(error);
       }
@@ -38,6 +38,10 @@ const handleUnauthenticatedUser = (req, res, next, strategyType, info) => {
       req.user = null;
       next();
       break;
+    case "OAUTH":
+      req.user = null;
+      next();
+      break;
     default:
       return res
         .status(500)
@@ -46,6 +50,7 @@ const handleUnauthenticatedUser = (req, res, next, strategyType, info) => {
 };
 
 export default passportCall;
+
 
 // const passportCall = (strategy, options = {}) => {
 //   return (req, res, next) => {

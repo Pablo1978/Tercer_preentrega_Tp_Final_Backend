@@ -46,7 +46,7 @@ socketClient.on("chat", (mensaje) => {
 socketClient.on("broadcast", (usuario) => {
   Toastify({
     text: `Ingreso ${usuario} al chat`,
-    duration: 5000,
+    duration: 3000,
     position: "center",
     style: {
       background: "linear-gradient(to right, #00b09b, #96c93d)",
