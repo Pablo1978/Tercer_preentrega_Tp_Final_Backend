@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-1
+  labels:
+    app: acuario-pablo
+spec:
+  selector:
+    matchLabels:
+      app: acuario-pablo
+  template:
+    metadata:
+      name: pod-1
+      labels:
+        app: acuario-pablo
+    spec:
+      containers:
+        - name: pod-container
+          image: pabloeltano/acuario-pablo:1.0.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MONGO_URL
+              value: "mongodb+srv://pabloeltano:tier26@cluster0.6a9bfhe.mongodb.net/ecommerce?retryWrites=true&w=majority"
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "8080"
+            - name: JWT_COOKIE
+              value: "authCookie"
+            - name: JWT_SECRET
+              value: "jwtSecret"
+            - name: GITHUB_CLIENT_ID
+              value: "Iv1.ecdb7f8e547fc390"
+            - name: GITHUB_CLIENT_SECRET
+              value: "282f1933dce49e538e6117b53b6aed49424665d5"
+            - name: GOOGLE_CLIENT_ID
+              value: "876750335845m9tb1o5eiqs84r4cob9ddcj0ven7t86c.apps.googleusercontent.com"
+            - name: GOOGLE_CLIENT_SECRET
+              value: "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"
+            - name: GMAIL_USER
+              value: "pabloeltano78.pf@gmail.com"
+            - name: GMAIL_PASSWORD
+              value: "evak ijrq tplj dfdw"
+            - name: TWILIO_ACCOUNT_SID
+              value: "AC5d19959451b98a4fa3c886d8cb574752"
+            - name: TWILIO_TOKEN
+              value: "4a710d902daca17bf7391edd46f8213"
+            - name: TWILIO_TEST_NUMBER
+              value: "+12565733405"
