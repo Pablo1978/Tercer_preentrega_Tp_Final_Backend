@@ -50,6 +50,7 @@ const ticketResponse = async () => {
                     </table>
                    `;
   }
+  
   finish.addEventListener("click", async () => {
     const deleteCart = await fetch(`/api/carts/${idCart}`, {
       method: "DELETE",

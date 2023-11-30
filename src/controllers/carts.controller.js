@@ -1,20 +1,23 @@
 import { cartsService, productsService, ticketsService, } from "../services/index.js";
-import ErrorsDictionary from "../dictionaries/errors.js";
-import errorCodes from "../dictionaries/errorCodes.js";
+import ErrorsDictionary from "../dictionary/errors.js";
+import errorCodes from "../dictionary/errorCodes.js";
 
 const getCarts = async (req, res, next) => {
   try {
     const carts = await cartsService.getCarts();
     return res.send({ status: "success", payload: carts });
   } catch (error) {
-    const knownError = ErrorsDictionary[error.name];
     const customError = new Error();
+    const knownError = ErrorsDictionary[error.name];
+
     if (knownError) {
       customError.name = knownError;
       customError.message = error.message;
       customError.code = errorCodes[knownError];
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(customError);
     } else {
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(error);
     }
   }
@@ -24,20 +27,32 @@ const getCartById = async (req, res, next) => {
   try {
     const { cid } = req.params;
     const cart = await cartsService.getCartById({ _id: cid });
-    if (!cart)
+    if (!cart) {
+      req.logger.warning(
+        `[${new Date().toISOString()}] Alerta: Carrito no existe`
+      );
       return res
         .status(404)
         .send({ status: "error", message: "Cart not found" });
-    return res.send({ status: "success", payload: cart });
+    } else {
+      req.logger.info(
+        `[${new Date().toISOString()}] Carrito obtenido con exito`
+      );
+      req.logger.debug(`[${new Date().toISOString()}] Carrito: ${cart._id}`);
+      return res.send({ status: "success", payload: cart });
+    }
   } catch (error) {
-    const knownError = ErrorsDictionary[error.name];
     const customError = new Error();
+    const knownError = ErrorsDictionary[error.name];
+
     if (knownError) {
       customError.name = knownError;
       customError.message = error.message;
       customError.code = errorCodes[knownError];
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(customError);
     } else {
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(error);
     }
   }
@@ -46,16 +61,24 @@ const getCartById = async (req, res, next) => {
 const createCart = async (req, res, next) => {
   try {
     const result = await cartsService.createCart(cart);
+    req.logger.info(
+      `[${new Date().toISOString()}] Carrito con id ${
+        result._id
+      } creado con exito`
+    );
     return res.send({ status: "success", payload: result._id });
   } catch (error) {
-    const knownError = ErrorsDictionary[error.name];
     const customError = new Error();
+    const knownError = ErrorsDictionary[error.name];
+
     if (knownError) {
       customError.name = knownError;
       customError.message = error.message;
       customError.code = errorCodes[knownError];
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(customError);
     } else {
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(error);
     }
   }
@@ -84,20 +107,29 @@ const deleteProduct = async (req, res, next) => {
           return "Deleted successfully";
         }
       } else {
+        req.logger.warning(
+          `[${new Date().toISOString()}] Alerta: Producto no existe`
+        );
         return `Product not found`;
       }
     } else {
+      req.logger.warning(
+        `[${new Date().toISOString()}] Alerta: Carrito no existe`
+      );
       return "Cart Not Found";
     }
   } catch (error) {
-    const knownError = ErrorsDictionary[error.name];
     const customError = new Error();
+    const knownError = ErrorsDictionary[error.name];
+
     if (knownError) {
       customError.name = knownError;
       customError.message = error.message;
       customError.code = errorCodes[knownError];
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(customError);
     } else {
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(error);
     }
   }
@@ -136,20 +168,29 @@ const addProduct = async (req, res, next) => {
         );
         return res.send({ status: "success", message: "Added successfully" });
       } else {
+        req.logger.warning(
+          `[${new Date().toISOString()}] Alerta: Producto no existe`
+        );
         return res.send({ status: "error", message: "Product not found" });
       }
     } else {
+      req.logger.warning(
+        `[${new Date().toISOString()}] Alerta: Carrito no existe`
+      );
       return res.send({ status: "error", message: "Cart not found" });
     }
   } catch (error) {
-    const knownError = ErrorsDictionary[error.name];
     const customError = new Error();
+    const knownError = ErrorsDictionary[error.name];
+
     if (knownError) {
       customError.name = knownError;
       customError.message = error.message;
       customError.code = errorCodes[knownError];
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(customError);
     } else {
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(error);
     }
   }
@@ -183,20 +224,26 @@ const updateProduct = async (req, res, next) => {
           message: "Product updated successfully",
         });
       } else {
+        req.logger.warning(
+          `[${new Date().toISOString()}] Alerta: Producto no existe`
+        );
         return res.send({ status: "error", message: "Product not found" });
       }
     } else {
       return res.send({ status: "error", message: "Cart not found" });
     }
   } catch (error) {
-    const knownError = ErrorsDictionary[error.name];
     const customError = new Error();
+    const knownError = ErrorsDictionary[error.name];
+
     if (knownError) {
       customError.name = knownError;
       customError.message = error.message;
       customError.code = errorCodes[knownError];
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(customError);
     } else {
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(error);
     }
   }
@@ -215,17 +262,23 @@ const deleteTotalProduct = async (req, res, next) => {
         message: "All products deleted successfully",
       });
     } else {
+      req.logger.warning(
+        `[${new Date().toISOString()}] Alerta: Carrito no existe`
+      );
       return res.send({ status: "error", message: "Cart not found" });
     }
   } catch (error) {
-    const knownError = ErrorsDictionary[error.name];
     const customError = new Error();
+    const knownError = ErrorsDictionary[error.name];
+
     if (knownError) {
       customError.name = knownError;
       customError.message = error.message;
       customError.code = errorCodes[knownError];
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(customError);
     } else {
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(error);
     }
   }
@@ -237,6 +290,9 @@ const updateCart = async (req, res, next) => {
     const cart = await cartsService.getCartById({ _id: cid });
 
     if (!cart) {
+      req.logger.warning(
+        `[${new Date().toISOString()}] Alerta: Carrito no existe`
+      );
       return res
         .status(404)
         .send({ status: "error", message: "Cart not found" });
@@ -256,7 +312,9 @@ const updateCart = async (req, res, next) => {
       customError.message = error.message;
       customError.code = errorCodes[knownError];
       next(customError);
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
     } else {
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(error);
     }
   }
@@ -266,11 +324,15 @@ const deleteCart = async (req, res, next) => {
   try {
     const { cid } = req.params;
     const cart = await cartsService.deleteCart({ _id: cid });
-    if (!cart)
+    if (!cart) {
+      req.logger.warning(
+        `[${new Date().toISOString()}] Alerta: Carrito no existe`
+      );
       return res
         .status(400)
         .send({ status: "error", message: "Cart not found" });
-    await cartsService.deleteCart(cid);
+      await cartsService.deleteCart(cid);
+    }
     return res.send({
       status: "success",
       message: "Cart deleted successfully",
@@ -282,8 +344,10 @@ const deleteCart = async (req, res, next) => {
       customError.name = knownError;
       customError.message = error.message;
       customError.code = errorCodes[knownError];
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(customError);
     } else {
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(error);
     }
   }
@@ -299,6 +363,9 @@ const purchaseCart = async (req, res, next) => {
     try {
       const cart = await cartsService.getCartById({ _id: cid });
       if (!cart) {
+        req.logger.warning(
+          `[${new Date().toISOString()}] Alerta: Carrito no existe`
+        );
         return res.status(404).send({
           status: "error",
           message: "Cart not found",
@@ -326,7 +393,7 @@ const purchaseCart = async (req, res, next) => {
         productPurchase.push(item);
       }
     } catch (error) {
-      console.error("An error occurred:", error);
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       return res.status(500).send({
         status: "error",
         message: "An error occurred while processing the purchase",
@@ -337,7 +404,6 @@ const purchaseCart = async (req, res, next) => {
       (acc, item) => acc + item.product.price * item.quantity,
       0
     );
-    
     const amount = total.toFixed(2);
 
     const codeTicket = Date.now().toString(15);
@@ -359,13 +425,13 @@ const purchaseCart = async (req, res, next) => {
         );
       }
     } catch (error) {
-      console.error("An error occurred:", error);
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       return res.status(500).send({
         status: "error",
         message: "An error occurred while processing the purchase",
       });
     }
-    console.log(newTicket);
+    req.logger.info(`[${new Date().toISOString()}] Ticket creado con exito`);
     return res.send({
       status: "success",
       message: "Cart purchased successfully",
@@ -378,8 +444,10 @@ const purchaseCart = async (req, res, next) => {
       customError.name = knownError;
       customError.message = error.message;
       customError.code = errorCodes[knownError];
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(customError);
     } else {
+      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
       next(error);
     }
   }
@@ -397,3 +465,4 @@ export default {
   deleteCart,
   purchaseCart,
 };
+

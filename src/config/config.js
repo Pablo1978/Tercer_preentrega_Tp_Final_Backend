@@ -1,17 +1,3 @@
-// import dotenv from "dotenv";
-// import { Command } from "commander";
-
-// const program = new Command();
-// program
-//   .option("-m, --mode <mode>", "Modo de trabajo", "production")
-//   .option("-p <port>", "Puerto del servidor", 8080);
-
-// program.parse();
-
-// dotenv.config({
-//   path: program.opts().mode === "dev" ? "./.env.dev" : "./.env.prod",
-// });
-
 export default {
   app: {
     PORT: process.env.PORT || 8080,
@@ -31,7 +17,7 @@ export default {
 
   gmail: {
     USER: process.env.GMAIL_USER,
-    PASS: process.env.GMAIL_PASS,
+    PASS: process.env.GMAIL_PASSWORD,
   },
 
   github: {
@@ -43,7 +29,7 @@ export default {
     CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   },
-
+  
   twilio: {
     ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID,
     AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,

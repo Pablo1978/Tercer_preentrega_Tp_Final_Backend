@@ -12,8 +12,6 @@ const storage = multer.diskStorage({
   },
 });
 
-//Ya tengo el almacenamiento, ahora sí, el uploader (Cargador)
-
 const uploader = multer({ storage });
 
 export default uploader;

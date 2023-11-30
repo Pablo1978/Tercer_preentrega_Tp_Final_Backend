@@ -2,7 +2,6 @@ import config from "../config/config.js";
 
 export default class PersistenceFactory {
   static getPersistence = async () => {
-    //Tengo una lista de las ENTIDADES que necesito modelar a nivel persistencia.
 
     let UsersDao;
     let CartsDao;
