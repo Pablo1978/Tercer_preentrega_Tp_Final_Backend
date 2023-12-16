@@ -112,31 +112,38 @@ const initializePassportStrategies = () => {
         callbackURL: "http://localhost:8080/api/sessions/githubcallback",
       },
       async (accessToken, refreshToken, profile, done) => {
-        try {
-          const email = profile._json.email;
+        const email = profile._json.email;
 
-          let user = await usersService.getUserBy({ email });
+        let user = await usersService.getUserBy({ email });
+        if (!user) {
+          const newUser = {
+            first_name: profile._json.name,
+            last_name: "",
+            age: "",
+            email,
+            password: "",
+            admin: false,
+          };
 
-          if (!user) {
-            const newUser = {
-              first_name: profile._json.name,
-              last_name: "",
-              age: "",
-              email,
-              password: "",
-              admin: false,
-            };
-            const createdUser = await usersService.createUser(newUser);
-            return done(null, createdUser);
+          let cart;
+
+          if (req.cookies["cart"]) {
+            cart = req.cookies["cart"];
           } else {
-            return done(null, user);
+            const cartResult = await cartsService.createCart();
+            cart = cartResult.id;
           }
-        } catch (err) {
-          return done(err);
+
+          newUser.cart = cart;
+          const result = await usersService.createUser(newUser);
+          return done(null, result);
+        } else {
+          return done(null, user);
         }
       }
     )
   );
+
   passport.use(
     "google",
     new GoogleStrategy(
@@ -148,6 +155,8 @@ const initializePassportStrategies = () => {
       },
       async (req, accessToken, refreshToken, profile, done) => {
         const { _json } = profile;
+        const email = _json.email;
+
         const user = await usersService.getUserBy({ email: _json.email });
         if (user) {
           return done(null, user);

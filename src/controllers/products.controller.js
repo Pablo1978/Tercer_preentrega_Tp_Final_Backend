@@ -1,7 +1,6 @@
 import { generateProducts } from "../mocks/products.js";
-import { productsService } from "../services/index.js";
-import ErrorsDictionary from "../dictionary/errors.js";
-import errorCodes from "../dictionary/errorCodes.js";
+import { productsService, usersService } from "../services/index.js";
+import myErrorHandler from "../helpers/myErrorHandler.js";
 
 const paginateProducts = async (req, res, next) => {
   try {
@@ -11,19 +10,8 @@ const paginateProducts = async (req, res, next) => {
     );
     return res.send({ status: "success", payload: products });
   } catch (error) {
-    const customError = new Error();
-    const knownError = ErrorsDictionary[error.name];
-
-    if (knownError) {
-      customError.name = knownError;
-      customError.message = error.message;
-      customError.code = errorCodes[knownError];
-      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
-      next(customError);
-    } else {
-      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
-      next(error);
-    }
+    myErrorHandler(error, next);
+    req.logger.error(error);
   }
 };
 
@@ -32,66 +20,66 @@ const getProductsBy = async (req, res, next) => {
     const { pid } = parseInt(req.params.pid);
     const product = await productsService.getProductBy(pid);
     if (product === "Not Found") {
-      req.logger.warning(
-        `[${new Date().toISOString()}] Alerta: Producto no encontrado`
-      );
+      req.logger.warning("Product not found");
       return res.status(400).json({ message: "Producto no encontrado" });
     } else if (product) {
       return res.status(200).json(product);
     } else {
-      req.logger.warning(
-        `[${new Date().toISOString()}] Alerta: Producto no encontrado`
-      );
+      req.logger.warning("Product not found");
       return res.status(400).json({ message: "Producto no encontrado" });
     }
   } catch (error) {
-    const customError = new Error();
-    const knownError = ErrorsDictionary[error.name];
-
-    if (knownError) {
-      customError.name = knownError;
-      customError.message = error.message;
-      customError.code = errorCodes[knownError];
-      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
-      next(customError);
-    } else {
-      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
-      next(error);
-    }
+    req.logger.error(error);
+    myErrorHandler(error, next);
   }
 };
 
 const createProduct = async (req, res, next) => {
   try {
-    const product = await productsService.createProduct(req.body);
-    if (product === "The insert code already exists") {
-      return res
-        .status(400)
-        .json({ message: "Error! product not created", product });
-    } else if (product === "Complete all fields") {
-      req.logger.warning(
-        `[${new Date().toISOString()}] Alerta: Producto no creado`
-      );
-      return res
-        .status(400)
-        .json({ message: "Error! product not created", product });
+    const { title, description, code, price, stock, category, thumbnails } =
+      req.body;
+    if (!title || !description || !code || !price || !stock || !category) {
+      req.logger.warning("Incomplete data");
+      return res.status(400).json({ message: "Error! product not created" });
+    }
+
+    const newProduct = {
+      title,
+      description,
+      code,
+      price,
+      stock,
+      category,
+      thumbnails,
+    };
+
+    if (req.user.role === "premium") {
+      const user = await usersService.getUserBy({ _id: req.user.id });
+      if (!user) {
+        return res
+          .status(404)
+          .send({ status: "error", message: "User not found" });
+      }
+      newProduct.owner = user._id;
     } else {
+      newProduct.owner = null;
+    }
+
+    const product = await productsService.createProduct(newProduct);
+
+    if (product === "The insert code already exists") {
+      req.logger.warning("The insert code already exists");
+      return res.status(400).json({ message: "Error! product not created" });
+    } else if (product === "Complete all fields") {
+      req.logger.warning("Incomplete data");
+      return res.status(400).json({ message: "Error! product not created" });
+    } else {
+      req.logger.info("Product created");
       return res.status(201).json({ message: "Product created", product });
     }
   } catch (error) {
-    const customError = new Error();
-    const knownError = ErrorsDictionary[error.name];
-
-    if (knownError) {
-      customError.name = knownError;
-      customError.message = error.message;
-      customError.code = errorCodes[knownError];
-      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
-      next(customError);
-    } else {
-      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
-      next(error);
-    }
+    req.logger.error(error);
+    myErrorHandler(error, next);
   }
 };
 
@@ -100,27 +88,15 @@ const updateProduct = async (req, res, next) => {
     const id = parseInt(req.params.pid);
     const product = await productsService.updateProduct(id, req.body);
     if (product) {
+      req.logger.info("Product updated");
       return res.status(200).json({ message: "Product updated", product });
     } else {
-      req.logger.warning(
-        `[${new Date().toISOString()}] Alerta: Producto no actualizado`
-      );
+      req.logger.warning("Product not updated");
       return res.status(400).json({ message: "Error! product not updated" });
     }
   } catch (error) {
-    const customError = new Error();
-    const knownError = ErrorsDictionary[error.name];
-
-    if (knownError) {
-      customError.name = knownError;
-      customError.message = error.message;
-      customError.code = errorCodes[knownError];
-      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
-      next(customError);
-    } else {
-      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
-      next(error);
-    }
+    req.logger.error(error);
+    myErrorHandler(error, next);
   }
 };
 
@@ -129,34 +105,20 @@ const deleteProduct = async (req, res, next) => {
     const id = parseInt(req.params.pid);
     const product = await productsService.deleteProduct(id);
     if (product === `Can't find product with id : ${id}`) {
-      req.logger.warning(
-        `[${new Date().toISOString()}] Alerta: Producto con id ${id} no eliminado`
-      );
+      req.logger.warning("Product not found");
       return res
         .status(400)
         .json({ message: "Error! Product not deleted", product });
     } else if (product) {
+      req.logger.info("Product deleted");
       return res.status(200).json({ message: "Product deleted", product });
     } else {
-      req.logger.warning(
-        `[${new Date().toISOString()}] Alerta: Producto no eliminado`
-      );
+      req.logger.warning("Product not deleted");
       return res.status(400).json({ message: "Error! Product not deleted" });
     }
   } catch (error) {
-    const customError = new Error();
-    const knownError = ErrorsDictionary[error.name];
-
-    if (knownError) {
-      customError.name = knownError;
-      customError.message = error.message;
-      customError.code = errorCodes[knownError];
-      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
-      next(customError);
-    } else {
-      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
-      next(error);
-    }
+    req.logger.error(error);
+    myErrorHandler(error, next);
   }
 };
 
@@ -167,20 +129,11 @@ const mockingProducts = async (req, res, next) => {
       const mockProduct = generateProducts();
       products.push(mockProduct);
     }
+    req.logger.info("Mock Products created");
     return res.send({ status: "success", payload: products });
   } catch (error) {
-    const knownError = ErrorsDictionary[error.name];
-    const customError = new Error();
-    if (knownError) {
-      customError.name = knownError;
-      customError.message = error.message;
-      customError.code = errorCodes[knownError];
-      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
-      next(customError);
-    } else {
-      req.logger.error(`[${new Date().toISOString()}] Error: ${error.message}`);
-      next(error);
-    }
+    req.logger.error(error);
+    myErrorHandler(error, next);
   }
 };
 
@@ -192,5 +145,4 @@ export default {
   deleteProduct,
   mockingProducts,
 };
-
 

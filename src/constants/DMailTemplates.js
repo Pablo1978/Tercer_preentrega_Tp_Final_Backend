@@ -1,5 +1,5 @@
 export default {
   WELCOME: "welcome",
-  PWD_RESTORE: "passwordrestore",
-  ORDER: "order",
+  RESTORE_PWD: "restorePwd",
+  PURCHASE: "purchase",
 };

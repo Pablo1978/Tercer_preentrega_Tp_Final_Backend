@@ -12,7 +12,7 @@ export default {
     ],
   },
 
-  passwordrestore: {
+  restorePwd: {
     subject: "Restablecimiento de contraseña",
     attachments: [
       {
@@ -23,7 +23,7 @@ export default {
     ],
   },
 
-  order: {
+  purchase: {
     subject: "Tu pedido ha sido procesado",
     attachments: [
       {

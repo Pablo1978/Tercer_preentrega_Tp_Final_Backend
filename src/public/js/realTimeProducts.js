@@ -28,7 +28,6 @@ function updateProductList(listProducts) {
     div.innerHTML = products;
   });
 }
-
 const form = document.getElementById("formProducts");
 form.addEventListener("submit", (evt) => {
   evt.preventDefault();
@@ -60,10 +59,10 @@ document.getElementById("delete-btn").addEventListener("click", (e) => {
   socketClient.emit("deleteProduct", deleteId);
   deleteIdInput.value = "";
   Swal.fire({
-    position: "center",
+    position: "top-end",
     icon: "success",
     title: "Producto eliminado",
     showConfirmButton: false,
-    timer: 2000,
+    timer: 1500,
   });
 });

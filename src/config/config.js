@@ -4,6 +4,7 @@ export default {
     ADMIN_EMAIL: process.env.ADMIN_EMAIL,
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
     PERSISTENCE: process.env.PERSISTENCE || "MONGO",
+    LOGGER_ENV: process.env.LOGGER_ENV || "development",
   },
 
   mongo: {
@@ -29,7 +30,12 @@ export default {
     CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   },
-  
+
+  mailer: {
+    USER: process.env.NODE_MAILER_USER,
+    PASS: process.env.NODE_MAILER_PASSWORD,
+  },
+
   twilio: {
     ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID,
     AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,

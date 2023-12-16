@@ -1,6 +1,5 @@
 import LoggerService from "../services/LoggerService.js";
 
-//console.log(process.env.LOGGER_ENTORNO);
 const logger = new LoggerService("development");
 const attachLogger = (req, res, next) => {
   req.logger = logger.logger;

@@ -5,7 +5,6 @@ async function addProduct(id) {
       method: "PUT",
     });
     const result = await response.json();
-
   } else {
     //si no encontro la cookie, es porque ya hay un usuario logueado
     const response = await fetch(`/api/carts/products/${id}`, {
@@ -22,3 +21,8 @@ function getCookie(name) {
 }
 
 const btnAddProduct = document.querySelectorAll(".btnAddProduct");
+
+// btnAddProduct.addEventListener("click", (e) => {
+//   e.preventDefault();
+//   console.log(e.target.id);
+// });

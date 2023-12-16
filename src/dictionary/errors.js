@@ -1,3 +1,3 @@
 export default {
-  ValidationError: "MONGOOSE_VALIDATION",
+  MONGOOSE_VALIDATION: "M001",
 };

@@ -1,6 +1,5 @@
 const ticket = document.getElementById("ticket");
 const finish = document.getElementById("finish");
-const sendMail = document.getElementById("sendMail");
 
 const ticketResponse = async () => {
   const user = await fetch("/api/sessions/current", {
@@ -50,7 +49,6 @@ const ticketResponse = async () => {
                     </table>
                    `;
   }
-  
   finish.addEventListener("click", async () => {
     const deleteCart = await fetch(`/api/carts/${idCart}`, {
       method: "DELETE",
@@ -60,17 +58,6 @@ const ticketResponse = async () => {
     });
 
     ticket.innerHTML = "";
-  });
-
-  sendMail.addEventListener("submit", async () => {
-    const send = await fetch("/api/sessions/mails", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const result = await send.json();
-    if (send.status === 200) return console.log("Email enviado");
   });
 };
 

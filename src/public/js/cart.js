@@ -18,13 +18,15 @@ const response = async () => {
     let total = 0;
 
     productsInCart.forEach((product) => {
-      products.innerHTML += ` <td> ${product.product.title}</td>
-                              <td> ${product.product.description}</td>
-                              <td> ${product.product.category}</td>
-                              <td> $ ${product.product.price}</td>
-                              <td> ${product.product.stock}</td>
-                              <td> ${product.quantity}</td>
-                              <td> $ ${product.product.price * product.quantity}</td>
+      products.innerHTML += ` <td>${product.product.title}</td>
+                              <td>${product.product.description}</td>
+                              <td>${product.product.category}</td>
+                              <td>$ ${product.product.price}</td>
+                              <td>${product.product.stock}</td>
+                              <td>${product.quantity}</td>
+                              <td>$ ${
+                                product.product.price * product.quantity
+                              }</td>
                               
       `;
     });
@@ -32,7 +34,6 @@ const response = async () => {
     productsInCart.forEach((product) => {
       total += product.product.price * product.quantity;
     });
-    
     const amount = total.toFixed(2);
     products.innerHTML += `
     <td></td><td></td><td></td><td></td><td></td><td><strong>Total</strong></td>
@@ -53,7 +54,7 @@ comprar.addEventListener("click", () => {
   if (cart) {
     Swal.fire({
       icon: "warning",
-      title: "No Iniciaste Sesión",
+      title: "Oops...",
       text: "Por favor, inicia sesión para realizar la compra",
       footer: '<a href="/">Registrate o inicia sesión</a>',
     });
